@@ -109,9 +109,23 @@ export function jalaliYearRange(today = todayIso()): DayRange {
   return { from: jalaliMonthRange(-monthsBack, today).from, to: today };
 }
 
+function monthParts(day: string): { month: string; year: string } {
+  const parts = monthName.formatToParts(parseIsoDay(day));
+  return {
+    month: parts.find((p) => p.type === 'month')?.value ?? '',
+    year: parts.find((p) => p.type === 'year')?.value ?? '',
+  };
+}
+
 /** "مهر ۱۴۰۵" for the Jalali month that contains the given ISO day. */
 export function jalaliMonthLabel(day: string): string {
-  return monthName.format(parseIsoDay(day));
+  const { month, year } = monthParts(day);
+  return `${month} ${year}`;
+}
+
+/** Just the month name ("مهر"). */
+export function jalaliMonthShort(day: string): string {
+  return monthParts(day).month;
 }
 
 /** A date without a time (goal start/deadline): shown as stored, without time-zone shifting. */

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   dayToApiInstant,
+  jalaliMonthLabel,
+  jalaliMonthShort,
   formatJalaliDay,
   instantToInputDay,
   jalaliMonthRange,
@@ -23,6 +25,12 @@ describe('jalali', () => {
     expect(jalaliOfIsoDay('2026-10-05')).toBe('۱۳ مهر ۱۴۰۵');
     expect(jalaliOfIsoDay('')).toBe('');
     expect(formatJalaliDay('2026-10-05T00:00:00Z')).toBe('۱۳ مهر ۱۴۰۵');
+  });
+
+  it('labels a Jalali month with its name and year', () => {
+    expect(jalaliMonthLabel('2026-10-05')).toBe('مهر ۱۴۰۵');
+    expect(jalaliMonthLabel('2026-03-25')).toBe('فروردین ۱۴۰۵');
+    expect(jalaliMonthShort('2026-10-05')).toBe('مهر');
   });
 
   it('gives the current Jalali month up to today', () => {

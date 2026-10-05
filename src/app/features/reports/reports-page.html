@@ -1,0 +1,173 @@
+<app-page-header title="گزارش‌ها" [subtitle]="rangeLabel()" />
+
+<section class="card periods" aria-label="بازه‌ی گزارش">
+  <div class="row">
+    @for (item of presets; track item.value) {
+      <button
+        type="button"
+        class="btn btn-sm"
+        [class.btn-primary]="preset() === item.value"
+        [attr.aria-pressed]="preset() === item.value"
+        (click)="setPreset(item.value)"
+      >
+        {{ item.label }}
+      </button>
+    }
+  </div>
+  @if (preset() === 'custom') {
+    <div class="form-grid custom">
+      <div class="field">
+        <label for="r-from">از تاریخ</label>
+        <input id="r-from" type="date" [value]="customFrom()" (change)="setCustomFrom($event)" />
+      </div>
+      <div class="field">
+        <label for="r-to">تا تاریخ</label>
+        <input id="r-to" type="date" [value]="customTo()" (change)="setCustomTo($event)" />
+      </div>
+    </div>
+    @if (!range()) {
+      <p class="muted small">هر دو تاریخ را انتخاب کنید؛ تاریخ پایان نباید قبل از شروع باشد.</p>
+    }
+  }
+</section>
+
+@if (error(); as message) {
+  <app-error [message]="message" (retry)="reload()" />
+} @else if (range()) {
+  @if (summary.hasValue()) {
+    @let s = summary.value();
+    <div class="stats">
+      <div class="stat">
+        <div class="label">درآمد</div>
+        <div class="value num income">{{ s.totalIncome | money }}</div>
+      </div>
+      <div class="stat">
+        <div class="label">هزینه</div>
+        <div class="value num expense">{{ s.totalExpense | money }}</div>
+      </div>
+      <div class="stat">
+        <div class="label">مانده (درآمد − هزینه)</div>
+        <div class="value num" [class.income]="s.netAmount > 0" [class.expense]="s.netAmount < 0">
+          {{ s.netAmount | money }}
+        </div>
+      </div>
+      <div class="stat">
+        <div class="label">نرخ پس‌انداز</div>
+        <div class="value num">{{ s.savingsRate | percent }}</div>
+      </div>
+      <div class="stat">
+        <div class="label">میانگین هزینه‌ی روزانه</div>
+        <div class="value num">{{ s.averageDailyExpense | money }}</div>
+      </div>
+      <div class="stat">
+        <div class="label">موجودی کل حساب‌ها</div>
+        <div class="value num">{{ s.totalBalance | money }}</div>
+      </div>
+    </div>
+  } @else {
+    <app-loading [count]="2" />
+  }
+
+  <div class="grid">
+    <section class="card">
+      <h2>نسبت به دوره‌ی قبل</h2>
+      @if (comparison.hasValue()) {
+        @let c = comparison.value();
+        <p class="muted small">
+          دوره‌ی قبل: از {{ c.previous.from | jalali }} تا {{ c.previous.to | jalali }} (به‌همان
+          اندازه)
+        </p>
+        <dl class="compare">
+          <div>
+            <dt>هزینه</dt>
+            <dd class="num">
+              <span [class]="changeClass(c.expenseChangePercent, false)">{{
+                changeText(c.expenseChangePercent)
+              }}</span>
+              <span class="muted small"
+                >({{ c.previous.totalExpense | money }} ←
+                {{ c.current.totalExpense | money }})</span
+              >
+            </dd>
+          </div>
+          <div>
+            <dt>درآمد</dt>
+            <dd class="num">
+              <span [class]="changeClass(c.incomeChangePercent, true)">{{
+                changeText(c.incomeChangePercent)
+              }}</span>
+              <span class="muted small"
+                >({{ c.previous.totalIncome | money }} ← {{ c.current.totalIncome | money }})</span
+              >
+            </dd>
+          </div>
+        </dl>
+      } @else {
+        <app-loading [count]="2" />
+      }
+    </section>
+
+    <section class="card">
+      <div class="row head">
+        <h2>
+          {{ breakdownType() === 'Expense' ? 'هزینه‌ها به تفکیک دسته' : 'درآمدها به تفکیک دسته' }}
+        </h2>
+        <span class="spacer"></span>
+        <div class="segmented" role="group" aria-label="نوع">
+          <button
+            type="button"
+            [attr.aria-pressed]="breakdownType() === 'Expense'"
+            (click)="breakdownType.set('Expense')"
+          >
+            هزینه
+          </button>
+          <button
+            type="button"
+            [attr.aria-pressed]="breakdownType() === 'Income'"
+            (click)="breakdownType.set('Income')"
+          >
+            درآمد
+          </button>
+        </div>
+      </div>
+      @if (breakdown.hasValue()) {
+        @if (categoryBars().length === 0) {
+          <app-empty title="در این بازه داده‌ای نیست" icon="📊" />
+        } @else {
+          <app-bar-list
+            [items]="categoryBars()"
+            [tone]="breakdownType() === 'Expense' ? 'expense' : 'income'"
+          />
+          <p class="muted small total">
+            جمع: <strong class="num">{{ breakdown.value().total | money }}</strong>
+          </p>
+        }
+      } @else {
+        <app-loading [count]="3" />
+      }
+    </section>
+  </div>
+}
+
+<section class="card trend">
+  <div class="row head">
+    <div>
+      <h2>روند ماهانه</h2>
+      <p class="muted small">{{ trendLabel() }}</p>
+    </div>
+    <span class="spacer"></span>
+    <label class="row small" for="r-months">
+      تعداد ماه
+      <select id="r-months" [value]="trendMonths()" (change)="setTrendMonths($event)">
+        <option value="3">۳</option>
+        <option value="6">۶</option>
+        <option value="12">۱۲</option>
+      </select>
+    </label>
+  </div>
+  @if (trend.hasValue()) {
+    <app-trend-chart [points]="trendPoints()" />
+  } @else if (!trend.error()) {
+    <app-loading [count]="3" />
+  }
+</section>
