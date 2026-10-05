@@ -1,0 +1,74 @@
+<app-page-header
+  title="دسته‌بندی‌ها"
+  subtitle="هر تراکنش به یک دسته تعلق دارد؛ دسته‌های پیش‌فرض را می‌توانید تغییر دهید."
+/>
+
+@if (loadError(); as message) {
+  <app-error [message]="message" (retry)="categories.reload()" />
+} @else if (categories.isLoading() && !categories.hasValue()) {
+  <app-loading />
+} @else {
+  <div class="columns">
+    @for (section of sections(); track section.type) {
+      <section class="card">
+        <h2>{{ section.title }}</h2>
+
+        <form class="add row" (submit)="add($event, section.type)">
+          <input
+            type="text"
+            maxlength="100"
+            [attr.aria-label]="'نام ' + section.title"
+            placeholder="نام دسته جدید"
+            [value]="newNames()[section.type]"
+            (input)="onNewName(section.type, $event)"
+          />
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="busy() || !newNames()[section.type].trim()"
+          >
+            افزودن
+          </button>
+        </form>
+
+        @if (section.items.length === 0) {
+          <app-empty title="دسته‌ای وجود ندارد" icon="🏷️" />
+        } @else {
+          <ul>
+            @for (category of section.items; track category.id) {
+              <li>
+                @if (editingId() === category.id) {
+                  <form class="row edit" (submit)="saveEdit($event, category)">
+                    <input
+                      type="text"
+                      maxlength="100"
+                      aria-label="نام جدید"
+                      [value]="editName()"
+                      (input)="onEditName($event)"
+                    />
+                    <button type="submit" class="btn btn-sm btn-primary" [disabled]="busy()">
+                      ذخیره
+                    </button>
+                    <button type="button" class="btn btn-sm" (click)="cancelEdit()">انصراف</button>
+                  </form>
+                } @else {
+                  <span class="name">{{ category.name }}</span>
+                  <button type="button" class="btn btn-sm btn-ghost" (click)="startEdit(category)">
+                    تغییر نام
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-ghost btn-danger"
+                    (click)="remove(category)"
+                  >
+                    حذف
+                  </button>
+                }
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+  </div>
+}

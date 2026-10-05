@@ -33,6 +33,12 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/accounts/accounts-page').then((m) => m.AccountsPage),
       },
+      {
+        path: 'categories',
+        title: 'دسته‌بندی‌ها',
+        loadComponent: () =>
+          import('./features/categories/categories-page').then((m) => m.CategoriesPage),
+      },
     ],
   },
   { path: '**', redirectTo: '' },
