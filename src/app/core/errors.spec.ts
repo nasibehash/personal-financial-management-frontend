@@ -23,7 +23,7 @@ describe('describeError', () => {
     expect(describeError(failure(400, { detail: 'The account is archived.' }))).toContain(
       'The account is archived.',
     );
-    expect(describeError(failure(409, { detail: 'Duplicate' }))).toContain('(Duplicate)');
+    expect(describeError(failure(409, { detail: 'Duplicate' }))).toContain('Duplicate');
     expect(describeError(failure(404, { detail: 'Account was not found' }))).toContain('پیدا نشد');
     expect(describeError(failure(503, { detail: 'Voice input is not configured.' }))).toContain(
       'Voice input',

@@ -6,16 +6,18 @@ import { AmountInput } from './amount-input';
 
 @Component({
   imports: [ReactiveFormsModule, AmountInput],
-  template: '<app-amount-input [formControl]="control" />',
+  template: '<app-amount-input [formControl]="control" [allowNegative]="allowNegative" />',
 })
 class Host {
   control = new FormControl<number | null>(null);
+  allowNegative = false;
 }
 
 describe('AmountInput', () => {
-  const setup = async () => {
+  const setup = async (allowNegative = false) => {
     await TestBed.configureTestingModule({ imports: [Host] }).compileComponents();
     const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.allowNegative = allowNegative;
     await fixture.whenStable();
     const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
     return { fixture, input, control: fixture.componentInstance.control };
@@ -87,5 +89,26 @@ describe('AmountInput', () => {
     control.reset();
     await fixture.whenStable();
     expect(input.value).toBe('');
+  });
+
+  it('rejects a minus sign unless negative values are allowed', async () => {
+    const { fixture, input, control } = await setup();
+
+    await type(fixture, input, '-5000');
+
+    expect(control.value).toBe(5000);
+    expect(input.value).toBe('5,000');
+  });
+
+  it('accepts negative values when allowed', async () => {
+    const { fixture, input, control } = await setup(true);
+
+    await type(fixture, input, '-1500000');
+    expect(control.value).toBe(-1500000);
+    expect(input.value).toBe('-1,500,000');
+
+    control.setValue(-250);
+    await fixture.whenStable();
+    expect(input.value).toBe('-250');
   });
 });

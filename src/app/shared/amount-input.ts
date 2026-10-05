@@ -43,11 +43,13 @@ export class AmountInput implements ControlValueAccessor {
   readonly inputId = input<string | null>(null);
   readonly placeholder = input('');
   readonly invalid = input(false);
+  /** Allow a leading minus, e.g. for an account that starts in debt. */
+  readonly allowNegative = input(false);
 
   protected readonly text = signal('');
   protected readonly disabled = signal(false);
   protected readonly hint = computed(() => {
-    const value = parseAmount(this.text());
+    const value = this.valueOf(this.text());
     return value === null ? '' : formatMoneyWithUnit(value);
   });
 
@@ -55,7 +57,7 @@ export class AmountInput implements ControlValueAccessor {
   protected touched: () => void = () => undefined;
 
   writeValue(value: number | null): void {
-    this.text.set(value === null || value === undefined ? '' : groupDigits(String(value)));
+    this.text.set(value === null || value === undefined ? '' : this.format(String(value)));
   }
 
   registerOnChange(fn: (value: number | null) => void): void {
@@ -72,9 +74,23 @@ export class AmountInput implements ControlValueAccessor {
 
   protected onInput(event: Event): void {
     const element = event.target as HTMLInputElement;
-    const grouped = groupDigits(element.value);
+    const grouped = this.format(element.value);
     element.value = grouped;
     this.text.set(grouped);
-    this.onChange(parseAmount(grouped));
+    this.onChange(this.valueOf(grouped));
+  }
+
+  private isNegative(text: string): boolean {
+    return this.allowNegative() && /^\s*[-−]/.test(text);
+  }
+
+  private format(text: string): string {
+    const grouped = groupDigits(text.replace(/^\s*[-−]/, ''));
+    return this.isNegative(text) ? `-${grouped}` : grouped;
+  }
+
+  private valueOf(text: string): number | null {
+    const amount = parseAmount(text.replace(/^-/, ''));
+    return amount === null ? null : this.isNegative(text) ? -amount : amount;
   }
 }

@@ -27,6 +27,12 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/dashboard/dashboard-page').then((m) => m.DashboardPage),
       },
+      {
+        path: 'accounts',
+        title: 'حساب‌ها',
+        loadComponent: () =>
+          import('./features/accounts/accounts-page').then((m) => m.AccountsPage),
+      },
     ],
   },
   { path: '**', redirectTo: '' },

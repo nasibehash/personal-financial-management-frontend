@@ -239,6 +239,17 @@ textarea {
   }
 }
 
+input[type='checkbox'],
+input[type='radio'] {
+  inline-size: auto;
+  accent-color: var(--primary);
+}
+
+.check {
+  font-weight: 500;
+  margin-block-start: 1rem;
+}
+
 textarea {
   resize: vertical;
 }

@@ -14,7 +14,8 @@ export function describeError(error: unknown): string {
 
   const body = (typeof error.error === 'object' && error.error ? error.error : {}) as ProblemBody;
   const detail = body.detail?.trim();
-  const withDetail = (lead: string) => (detail ? `${lead} (${detail})` : lead);
+  // The server's detail is English: isolate it so its punctuation does not jump around in the Persian sentence.
+  const withDetail = (lead: string) => (detail ? `${lead} (\u2066${detail}\u2069)` : lead);
 
   switch (error.status) {
     case 0:
