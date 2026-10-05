@@ -56,6 +56,12 @@ export const routes: Routes = [
         loadComponent: () => import('./features/goals/goals-page').then((m) => m.GoalsPage),
       },
       {
+        path: 'assistant',
+        title: 'دستیار هوشمند',
+        loadComponent: () =>
+          import('./features/assistant/assistant-page').then((m) => m.AssistantPage),
+      },
+      {
         path: 'goals/:id',
         title: 'جزئیات هدف',
         loadComponent: () =>
