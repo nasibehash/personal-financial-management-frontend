@@ -7,7 +7,7 @@ import { Lookups } from '../../core/lookups';
 import { Category, CategoryType } from '../../core/models';
 import { ConfirmService } from '../../shared/confirm';
 import { PageHeader } from '../../shared/page-header';
-import { resourceValue } from '../../shared/resource-value';
+import { resourceValue } from '../../core/resource-value';
 import { EmptyState, ErrorBlock, Loading } from '../../shared/state-views';
 import { ToastService } from '../../shared/toast';
 

@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Account, AuthResponse } from './models';
+import { Lookups } from './lookups';
+import { Account, AuthResponse, Category, Transaction } from './models';
 
 /** Helpers shared by the specs. */
 
@@ -50,6 +51,49 @@ export function account(overrides: Partial<Account> = {}): Account {
     initialBalance: 1000,
     balance: 1500,
     isArchived: false,
+    ...overrides,
+  };
+}
+
+export const CATEGORIES: Category[] = [
+  { id: 'e1', name: 'خوراک', type: 'Expense' },
+  { id: 'e2', name: 'حمل و نقل', type: 'Expense' },
+  { id: 'i1', name: 'حقوق', type: 'Income' },
+];
+
+export const ACCOUNTS: Account[] = [
+  account(),
+  account({ id: 'acc-2', name: 'حساب ملی', type: 'BankAccount' }),
+];
+
+/** A stand-in for the lookup store with fixed accounts and categories (no requests). */
+export function fakeLookups(
+  accounts: Account[] = ACCOUNTS,
+  categories: Category[] = CATEGORIES,
+): Lookups {
+  return {
+    accountList: () => accounts,
+    categoryList: () => categories,
+    expenseCategories: () => categories.filter((c) => c.type === 'Expense'),
+    incomeCategories: () => categories.filter((c) => c.type === 'Income'),
+    refresh: () => undefined,
+  } as unknown as Lookups;
+}
+
+export function transaction(overrides: Partial<Transaction> = {}): Transaction {
+  return {
+    id: 'tx-1',
+    type: 'Expense',
+    amount: 250000,
+    date: '2026-10-05T12:00:00Z',
+    description: 'ناهار',
+    accountId: 'acc-1',
+    accountName: 'کیف پول',
+    destinationAccountId: null,
+    destinationAccountName: null,
+    categoryId: 'e1',
+    categoryName: 'خوراک',
+    source: 'Manual',
     ...overrides,
   };
 }

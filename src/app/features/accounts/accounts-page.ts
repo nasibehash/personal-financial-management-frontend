@@ -8,7 +8,7 @@ import { Account } from '../../core/models';
 import { ConfirmService } from '../../shared/confirm';
 import { ACCOUNT_TYPE_LABELS } from '../../shared/labels';
 import { PageHeader } from '../../shared/page-header';
-import { resourceValue } from '../../shared/resource-value';
+import { resourceValue } from '../../core/resource-value';
 import { MoneyPipe } from '../../shared/pipes';
 import { EmptyState, ErrorBlock, Loading } from '../../shared/state-views';
 import { ToastService } from '../../shared/toast';

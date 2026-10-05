@@ -1,0 +1,120 @@
+<app-modal [title]="transaction() ? 'ویرایش تراکنش' : 'تراکنش جدید'" (closed)="cancelled.emit()">
+  <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+    @if (error(); as message) {
+      <div class="alert alert-error" role="alert">{{ message }}</div>
+    }
+
+    <div class="segmented" role="group" aria-label="نوع تراکنش">
+      @for (type of types; track type) {
+        <button
+          type="button"
+          [attr.aria-pressed]="form.controls.type.value === type"
+          (click)="setType(type)"
+        >
+          {{ typeLabels[type] }}
+        </button>
+      }
+    </div>
+
+    <div class="form-grid">
+      <div class="field">
+        <label for="tx-amount">مبلغ</label>
+        <app-amount-input
+          inputId="tx-amount"
+          formControlName="amount"
+          [invalid]="showError('amount')"
+        />
+        @if (showError('amount')) {
+          <span class="field-error">مبلغ را وارد کنید.</span>
+        }
+      </div>
+
+      <div class="field">
+        <label for="tx-date">تاریخ</label>
+        <input
+          id="tx-date"
+          type="date"
+          formControlName="date"
+          [class.invalid]="showError('date')"
+        />
+        <span class="muted small">{{ jalali(form.controls.date.value) }}</span>
+      </div>
+
+      <div class="field">
+        <label for="tx-account">{{ isTransfer() ? 'از حساب' : 'حساب' }}</label>
+        <select
+          id="tx-account"
+          formControlName="accountId"
+          [class.invalid]="showError('accountId')"
+        >
+          <option value="" disabled>انتخاب کنید</option>
+          @for (account of accounts(); track account.id) {
+            <option [value]="account.id">{{ account.name }}</option>
+          }
+        </select>
+        @if (showError('accountId')) {
+          <span class="field-error">یک حساب انتخاب کنید.</span>
+        }
+        @if (accounts().length === 0) {
+          <span class="muted small">اول در بخش «حساب‌ها» یک حساب بسازید.</span>
+        }
+      </div>
+
+      @if (isTransfer()) {
+        <div class="field">
+          <label for="tx-destination">به حساب</label>
+          <select
+            id="tx-destination"
+            formControlName="destinationAccountId"
+            [class.invalid]="showError('destinationAccountId') || sameAccount"
+          >
+            <option value="" disabled>انتخاب کنید</option>
+            @for (account of accounts(); track account.id) {
+              <option [value]="account.id">{{ account.name }}</option>
+            }
+          </select>
+          @if (sameAccount) {
+            <span class="field-error">حساب مبدأ و مقصد باید متفاوت باشند.</span>
+          } @else if (showError('destinationAccountId')) {
+            <span class="field-error">حساب مقصد را انتخاب کنید.</span>
+          }
+        </div>
+      } @else {
+        <div class="field">
+          <label for="tx-category">دسته‌بندی</label>
+          <select
+            id="tx-category"
+            formControlName="categoryId"
+            [class.invalid]="showError('categoryId')"
+          >
+            <option value="" disabled>انتخاب کنید</option>
+            @for (category of categories(); track category.id) {
+              <option [value]="category.id">{{ category.name }}</option>
+            }
+          </select>
+          @if (showError('categoryId')) {
+            <span class="field-error">یک دسته‌بندی انتخاب کنید.</span>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="field desc">
+      <label for="tx-description">توضیحات (اختیاری)</label>
+      <input
+        id="tx-description"
+        type="text"
+        formControlName="description"
+        maxlength="500"
+        [class.invalid]="showError('description')"
+      />
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn" (click)="cancelled.emit()">انصراف</button>
+      <button type="submit" class="btn btn-primary" [disabled]="saving()">
+        {{ saving() ? 'در حال ذخیره…' : 'ذخیره' }}
+      </button>
+    </div>
+  </form>
+</app-modal>

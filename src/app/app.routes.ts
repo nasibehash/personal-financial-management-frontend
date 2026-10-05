@@ -39,6 +39,12 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/categories/categories-page').then((m) => m.CategoriesPage),
       },
+      {
+        path: 'transactions',
+        title: 'تراکنش‌ها',
+        loadComponent: () =>
+          import('./features/transactions/transactions-page').then((m) => m.TransactionsPage),
+      },
     ],
   },
   { path: '**', redirectTo: '' },
