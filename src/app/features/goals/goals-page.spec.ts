@@ -3,26 +3,8 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { Goal } from '../../core/models';
-import { settle, startLoading } from '../../core/testing';
+import { goal, settle, startLoading } from '../../core/testing';
 import { GoalsPage } from './goals-page';
-
-export const goal = (overrides: Partial<Goal> = {}): Goal => ({
-  id: 'g-1',
-  name: 'خرید ماشین',
-  description: null,
-  targetAmount: 1000,
-  currentAmount: 250,
-  remainingAmount: 750,
-  progressPercent: 25,
-  startDate: '2026-01-01T00:00:00Z',
-  deadline: null,
-  daysLeft: null,
-  requiredMonthlySaving: null,
-  isOverdue: false,
-  status: 'Active',
-  ...overrides,
-});
 
 describe('GoalsPage', () => {
   beforeEach(() => localStorage.clear());

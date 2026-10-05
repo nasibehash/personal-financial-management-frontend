@@ -3,9 +3,8 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { setValue, settle, startLoading, submit } from '../../core/testing';
+import { goal, setValue, settle, startLoading, submit } from '../../core/testing';
 import { GoalDetailPage } from './goal-detail-page';
-import { goal } from './goals-page.spec';
 
 describe('GoalDetailPage', () => {
   beforeEach(() => localStorage.clear());
