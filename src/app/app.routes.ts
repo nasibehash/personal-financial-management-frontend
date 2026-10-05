@@ -50,6 +50,17 @@ export const routes: Routes = [
         title: 'گزارش‌ها',
         loadComponent: () => import('./features/reports/reports-page').then((m) => m.ReportsPage),
       },
+      {
+        path: 'goals',
+        title: 'اهداف',
+        loadComponent: () => import('./features/goals/goals-page').then((m) => m.GoalsPage),
+      },
+      {
+        path: 'goals/:id',
+        title: 'جزئیات هدف',
+        loadComponent: () =>
+          import('./features/goals/goal-detail-page').then((m) => m.GoalDetailPage),
+      },
     ],
   },
   { path: '**', redirectTo: '' },

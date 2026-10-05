@@ -1,0 +1,68 @@
+<app-page-header
+  title="اهداف مالی"
+  subtitle="برای چیزهایی که می‌خواهید بخرید یا انجام دهید پس‌انداز کنید"
+>
+  <button type="button" class="btn btn-primary" (click)="creating.set(true)">هدف جدید</button>
+</app-page-header>
+
+<div class="segmented filters" role="group" aria-label="وضعیت هدف">
+  @for (item of filters; track item.label) {
+    <button
+      type="button"
+      [attr.aria-pressed]="status() === item.value"
+      (click)="status.set(item.value)"
+    >
+      {{ item.label }}
+    </button>
+  }
+</div>
+
+@if (loadError(); as message) {
+  <app-error [message]="message" (retry)="goals.reload()" />
+} @else if (goals.isLoading() && list().length === 0) {
+  <app-loading />
+} @else if (list().length === 0) {
+  <div class="card">
+    <app-empty title="هدفی پیدا نشد" hint="یک هدف بسازید و کم‌کم برایش پس‌انداز کنید." icon="🎯">
+      <button type="button" class="btn btn-primary" (click)="creating.set(true)">ساخت هدف</button>
+    </app-empty>
+  </div>
+} @else {
+  <div class="cards">
+    @for (goal of list(); track goal.id) {
+      <a class="card goal" [routerLink]="['/goals', goal.id]">
+        <div class="row">
+          <h2>{{ goal.name }}</h2>
+          <span
+            class="badge"
+            [class.badge-income]="goal.status === 'Completed'"
+            [class.badge-primary]="goal.status === 'Active'"
+          >
+            {{ statusLabels[goal.status] }}
+          </span>
+        </div>
+        <app-progress
+          [value]="goal.progressPercent"
+          [tone]="goal.status === 'Completed' ? 'income' : goal.isOverdue ? 'warn' : 'primary'"
+          [label]="'پیشرفت ' + goal.name"
+        />
+        <div class="amounts num">
+          <span>{{ goal.currentAmount | money }}</span>
+          <span class="muted">از {{ goal.targetAmount | money }} تومان</span>
+        </div>
+        @if (goal.deadline) {
+          <div class="small" [class.expense]="goal.isOverdue" [class.muted]="!goal.isOverdue">
+            مهلت: {{ goal.deadline | jalali }}
+            @if (goal.isOverdue) {
+              (گذشته)
+            }
+          </div>
+        }
+      </a>
+    }
+  </div>
+}
+
+@if (creating()) {
+  <app-goal-form (saved)="onCreated()" (cancelled)="creating.set(false)" />
+}
