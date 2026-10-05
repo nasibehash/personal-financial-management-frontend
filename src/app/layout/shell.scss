@@ -1,0 +1,80 @@
+.bar {
+  background: var(--surface);
+  border-block-end: 1px solid var(--border);
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 10;
+}
+.bar-inner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-block: 0.6rem;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+}
+.logo {
+  display: grid;
+  place-items: center;
+  inline-size: 2rem;
+  block-size: 2rem;
+  border-radius: 0.6rem;
+  background: var(--primary);
+  color: var(--on-primary);
+}
+nav {
+  display: flex;
+  gap: 0.2rem;
+  flex: 1;
+  flex-wrap: wrap;
+}
+nav a {
+  padding: 0.35rem 0.8rem;
+  border-radius: 0.6rem;
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 500;
+}
+nav a.active {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.user {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.menu-toggle {
+  display: none;
+  margin-inline-start: auto;
+}
+main {
+  padding-block: 1.5rem 4rem;
+}
+
+@media (max-width: 52rem) {
+  .bar-inner {
+    flex-wrap: wrap;
+  }
+  .menu-toggle {
+    display: inline-flex;
+  }
+  nav {
+    display: none;
+    order: 5;
+    flex-basis: 100%;
+    flex-direction: column;
+  }
+  nav.open {
+    display: flex;
+  }
+  .user-name {
+    display: none;
+  }
+}

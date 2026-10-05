@@ -1,0 +1,94 @@
+<section class="card entry">
+  <h2>ثبت سریع با دستیار</h2>
+  <p class="muted small">
+    مثلاً «دیروز ناهار ۲۵۰ هزار تومان» یا «حقوق ۳۰ میلیون تومان به حساب ملی». پیش از ثبت، برداشت
+    دستیار را می‌بینید و تأیید می‌کنید.
+  </p>
+
+  @if (error(); as message) {
+    <div class="alert alert-error" role="alert">{{ message }}</div>
+  }
+
+  <div class="input-row">
+    <textarea
+      rows="2"
+      aria-label="جمله‌ی تراکنش"
+      placeholder="تراکنش را بنویسید…"
+      [ngModel]="text()"
+      (ngModelChange)="text.set($event)"
+      [disabled]="busy() || recording()"
+    ></textarea>
+    <div class="buttons">
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="busy() || recording() || !text().trim()"
+        (click)="analyze()"
+      >
+        {{ busy() ? 'در حال بررسی…' : 'بررسی' }}
+      </button>
+      @if (canRecord) {
+        <button
+          type="button"
+          class="btn"
+          [class.btn-danger]="recording()"
+          [disabled]="busy()"
+          [attr.aria-pressed]="recording()"
+          (click)="toggleRecording()"
+        >
+          {{ recording() ? '⏹ توقف ضبط' : '🎤 ضبط صدا' }}
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (draft(); as d) {
+    <div class="preview" aria-live="polite">
+      <h3>دستیار این‌طور برداشت کرد:</h3>
+      <dl>
+        <dt>نوع</dt>
+        <dd>{{ typeLabels[d.type] }}</dd>
+        <dt>مبلغ</dt>
+        <dd class="num">{{ d.amount | money }} تومان</dd>
+        <dt>تاریخ</dt>
+        <dd>{{ d.date | jalali }}</dd>
+        <dt>حساب</dt>
+        <dd>{{ d.accountName ?? '— مشخص نشد' }}</dd>
+        @if (d.type === 'Transfer') {
+          <dt>به حساب</dt>
+          <dd>{{ d.destinationAccountName ?? '— مشخص نشد' }}</dd>
+        } @else {
+          <dt>دسته‌بندی</dt>
+          <dd>{{ d.categoryName ?? '— مشخص نشد' }}</dd>
+        }
+        @if (d.description) {
+          <dt>توضیحات</dt>
+          <dd>{{ d.description }}</dd>
+        }
+      </dl>
+      @if (!canConfirm()) {
+        <p class="alert">حساب مشخص نشد؛ از «ویرایش و ثبت» استفاده کنید و حساب را انتخاب کنید.</p>
+      }
+      <div class="form-actions">
+        <button type="button" class="btn" (click)="discard()">انصراف</button>
+        <button type="button" class="btn" (click)="editing.set(true)">ویرایش و ثبت</button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="!canConfirm() || busy()"
+          (click)="confirm()"
+        >
+          تأیید و ثبت
+        </button>
+      </div>
+    </div>
+  }
+</section>
+
+@if (editing() && draft(); as d) {
+  <app-transaction-form
+    [draft]="asRequest(d)"
+    (saved)="onEdited()"
+    (cancelled)="editing.set(false)"
+  />
+}

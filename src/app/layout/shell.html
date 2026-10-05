@@ -1,0 +1,39 @@
+<header class="bar">
+  <div class="container bar-inner">
+    <a class="brand" routerLink="/" (click)="closeMenu()">
+      <span class="logo" aria-hidden="true">₮</span>
+      <span class="brand-name">مدیریت مالی</span>
+    </a>
+
+    <button
+      type="button"
+      class="btn btn-sm menu-toggle"
+      aria-controls="main-nav"
+      [attr.aria-expanded]="menuOpen()"
+      (click)="toggleMenu()"
+    >
+      منو
+    </button>
+
+    <nav id="main-nav" aria-label="منوی اصلی" [class.open]="menuOpen()">
+      @for (item of nav; track item.path) {
+        <a
+          [routerLink]="item.path"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: !!item.exact }"
+          (click)="closeMenu()"
+          >{{ item.label }}</a
+        >
+      }
+    </nav>
+
+    <div class="user">
+      <span class="user-name muted small">{{ auth.user()?.fullName }}</span>
+      <button type="button" class="btn btn-sm" (click)="logout()">خروج</button>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <router-outlet />
+</main>

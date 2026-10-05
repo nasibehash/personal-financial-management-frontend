@@ -1,0 +1,36 @@
+.summary {
+  margin-block-end: 1rem;
+}
+.total {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+.unit {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+.check-inline {
+  font-weight: 500;
+}
+.account {
+  display: grid;
+  gap: 0.35rem;
+  align-content: start;
+}
+.account h2 {
+  margin: 0;
+}
+.account.archived {
+  opacity: 0.75;
+}
+.balance {
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+.actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-block-start: 0.5rem;
+}

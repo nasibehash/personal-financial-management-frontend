@@ -1,0 +1,56 @@
+<app-modal [title]="account() ? 'ویرایش حساب' : 'حساب جدید'" (closed)="cancelled.emit()">
+  <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+    @if (error(); as message) {
+      <div class="alert alert-error" role="alert">{{ message }}</div>
+    }
+
+    <div class="form-grid">
+      <div class="field">
+        <label for="account-name">نام حساب</label>
+        <input
+          id="account-name"
+          type="text"
+          formControlName="name"
+          placeholder="مثلاً کیف پول، حساب ملی"
+          [class.invalid]="invalid('name')"
+        />
+        @if (invalid('name')) {
+          <span class="field-error">نام حساب را وارد کنید (حداکثر ۱۰۰ کاراکتر).</span>
+        }
+      </div>
+
+      <div class="field">
+        <label for="account-type">نوع حساب</label>
+        <select id="account-type" formControlName="type">
+          @for (type of types; track type) {
+            <option [value]="type">{{ typeLabels[type] }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="account-initial">موجودی اولیه</label>
+        <app-amount-input
+          inputId="account-initial"
+          formControlName="initialBalance"
+          [allowNegative]="true"
+        />
+        <span class="muted small">برای حساب بدهکار (مثل کارت اعتباری) عدد منفی وارد کنید.</span>
+      </div>
+    </div>
+
+    @if (account()) {
+      <label class="row check">
+        <input type="checkbox" formControlName="isArchived" />
+        بایگانی (دیگر در تراکنش‌های جدید دیده نمی‌شود)
+      </label>
+    }
+
+    <div class="form-actions">
+      <button type="button" class="btn" (click)="cancelled.emit()">انصراف</button>
+      <button type="submit" class="btn btn-primary" [disabled]="saving()">
+        {{ saving() ? 'در حال ذخیره…' : 'ذخیره' }}
+      </button>
+    </div>
+  </form>
+</app-modal>

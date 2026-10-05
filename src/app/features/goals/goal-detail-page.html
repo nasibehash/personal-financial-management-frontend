@@ -1,0 +1,124 @@
+<p><a routerLink="/goals" class="small">→ همه‌ی اهداف</a></p>
+
+@if (loadError(); as message) {
+  <app-error [message]="message" (retry)="detail.reload()" />
+} @else if (data(); as d) {
+  @let goal = d.goal;
+  <app-page-header [title]="goal.name" [subtitle]="goal.description ?? ''">
+    <button type="button" class="btn" (click)="editing.set(true)">ویرایش</button>
+    @if (goal.status === 'Cancelled') {
+      <button type="button" class="btn" (click)="setCancelled(goal, false)">
+        فعال‌سازی دوباره
+      </button>
+    } @else if (goal.status === 'Active') {
+      <button type="button" class="btn" (click)="setCancelled(goal, true)">لغو هدف</button>
+    }
+    <button type="button" class="btn btn-danger" (click)="remove(goal)">حذف</button>
+  </app-page-header>
+
+  <section class="card stack">
+    <div class="row">
+      <span
+        class="badge"
+        [class.badge-income]="goal.status === 'Completed'"
+        [class.badge-primary]="goal.status === 'Active'"
+      >
+        {{ statusLabels[goal.status] }}
+      </span>
+      <span class="num progress-text">{{ goal.progressPercent }}٪</span>
+    </div>
+    <app-progress
+      [value]="goal.progressPercent"
+      [tone]="goal.status === 'Completed' ? 'income' : 'primary'"
+      [label]="'پیشرفت ' + goal.name"
+    />
+    <div class="stats">
+      <div class="stat">
+        <div class="label">پس‌انداز شده</div>
+        <div class="value num income">{{ goal.currentAmount | money }}</div>
+      </div>
+      <div class="stat">
+        <div class="label">مبلغ هدف</div>
+        <div class="value num">{{ goal.targetAmount | money }}</div>
+      </div>
+      <div class="stat">
+        <div class="label">باقی‌مانده</div>
+        <div class="value num">{{ goal.remainingAmount | money }}</div>
+      </div>
+      @if (goal.deadline) {
+        <div class="stat">
+          <div class="label">مهلت</div>
+          <div class="value" [class.expense]="goal.isOverdue">{{ goal.deadline | jalali }}</div>
+          @if (goal.daysLeft !== null && !goal.isOverdue) {
+            <div class="muted small">{{ goal.daysLeft }} روز مانده</div>
+          }
+        </div>
+      }
+      @if (goal.requiredMonthlySaving !== null && goal.status === 'Active') {
+        <div class="stat">
+          <div class="label">پس‌انداز ماهانه‌ی لازم</div>
+          <div class="value num">{{ goal.requiredMonthlySaving | money }}</div>
+        </div>
+      }
+    </div>
+  </section>
+
+  @if (goal.status === 'Active') {
+    <section class="card contribute">
+      <h2>واریز به هدف</h2>
+      <form [formGroup]="form" (ngSubmit)="contribute()" novalidate>
+        @if (error(); as message) {
+          <div class="alert alert-error" role="alert">{{ message }}</div>
+        }
+        <div class="form-grid">
+          <div class="field">
+            <label for="c-amount">مبلغ (تومان)</label>
+            <app-amount-input inputId="c-amount" formControlName="amount" />
+            @if (invalidAmount()) {
+              <span class="field-error">مبلغ باید بیشتر از صفر باشد.</span>
+            }
+          </div>
+          <div class="field">
+            <label for="c-date">تاریخ</label>
+            <input id="c-date" type="date" formControlName="date" />
+          </div>
+          <div class="field">
+            <label for="c-note">یادداشت</label>
+            <input id="c-note" type="text" formControlName="note" />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" [disabled]="saving()">
+            {{ saving() ? 'در حال ثبت…' : 'ثبت واریز' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+
+  <section class="card">
+    <h2>تاریخچه‌ی واریزها</h2>
+    @if (d.contributions.length === 0) {
+      <p class="muted">هنوز واریزی ثبت نشده است.</p>
+    } @else {
+      <ul class="contributions">
+        @for (c of d.contributions; track c.id) {
+          <li>
+            <span class="num income ltr">+{{ c.amount | money }}</span>
+            <span class="muted small">{{ c.date | jalali }}</span>
+            <span class="note">{{ c.note }}</span>
+            <button type="button" class="btn btn-sm btn-danger" (click)="removeContribution(c.id)">
+              حذف
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+  @if (editing()) {
+    <app-goal-form [goal]="goal" (saved)="onSaved()" (cancelled)="editing.set(false)" />
+  }
+} @else {
+  <app-loading />
+}

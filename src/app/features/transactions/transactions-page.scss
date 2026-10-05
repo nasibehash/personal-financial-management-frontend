@@ -1,0 +1,59 @@
+.filters {
+  margin-block-end: 1rem;
+}
+.presets {
+  margin-block-end: 0.75rem;
+}
+.list.reloading {
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.tx {
+  display: grid;
+  grid-template-columns: 7rem 1fr auto auto;
+  grid-template-areas: 'date desc amount actions';
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding-block: 0.7rem;
+  border-block-end: 1px solid var(--border);
+}
+.date {
+  grid-area: date;
+}
+.desc {
+  grid-area: desc;
+  min-inline-size: 0;
+}
+.amount {
+  grid-area: amount;
+  font-weight: 700;
+  white-space: nowrap;
+  text-align: end;
+}
+.actions {
+  grid-area: actions;
+  white-space: nowrap;
+}
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+.pager {
+  padding-block-start: 0.75rem;
+}
+
+@media (max-width: 40rem) {
+  .tx {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      'desc amount'
+      'date actions';
+  }
+}

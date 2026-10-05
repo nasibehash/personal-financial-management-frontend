@@ -1,0 +1,68 @@
+<app-page-header title="حساب‌ها" subtitle="کیف پول‌ها و حساب‌های بانکی شما">
+  <button type="button" class="btn btn-primary" (click)="editing.set(null)">حساب جدید</button>
+</app-page-header>
+
+<div class="summary card row">
+  <div>
+    <div class="muted small">مجموع موجودی حساب‌های فعال</div>
+    <div class="total num" [class.expense]="total() < 0">
+      {{ total() | money }} <span class="unit">تومان</span>
+    </div>
+  </div>
+  <span class="spacer"></span>
+  <label class="row check-inline">
+    <input type="checkbox" [checked]="showArchived()" (change)="toggleArchived($event)" />
+    نمایش حساب‌های بایگانی‌شده
+  </label>
+</div>
+
+@if (loadError(); as message) {
+  <app-error [message]="message" (retry)="accounts.reload()" />
+} @else if (accounts.isLoading() && list().length === 0) {
+  <app-loading />
+} @else if (list().length === 0) {
+  <div class="card">
+    <app-empty
+      title="هنوز حسابی ندارید"
+      hint="برای ثبت تراکنش اول باید یک حساب بسازید، مثلاً «کیف پول»."
+      icon="👛"
+    >
+      <button type="button" class="btn btn-primary" (click)="editing.set(null)">
+        ساخت اولین حساب
+      </button>
+    </app-empty>
+  </div>
+} @else {
+  <div class="cards">
+    @for (account of list(); track account.id) {
+      <article class="card account" [class.archived]="account.isArchived">
+        <div class="row">
+          <h2>{{ account.name }}</h2>
+          <span class="badge badge-primary">{{ typeLabels[account.type] }}</span>
+          @if (account.isArchived) {
+            <span class="badge badge-warn">بایگانی‌شده</span>
+          }
+        </div>
+        <div class="balance num" [class.expense]="account.balance < 0">
+          {{ account.balance | money }} <span class="unit">تومان</span>
+        </div>
+        <div class="muted small">موجودی اولیه: {{ account.initialBalance | money }}</div>
+        <div class="actions">
+          <button type="button" class="btn btn-sm" (click)="editing.set(account)">ویرایش</button>
+          <button type="button" class="btn btn-sm" (click)="toggleArchive(account)">
+            {{ account.isArchived ? 'خروج از بایگانی' : 'بایگانی' }}
+          </button>
+          <button type="button" class="btn btn-sm btn-danger" (click)="remove(account)">حذف</button>
+        </div>
+      </article>
+    }
+  </div>
+}
+
+@if (editing() !== undefined) {
+  <app-account-form
+    [account]="editing() ?? null"
+    (saved)="onSaved()"
+    (cancelled)="editing.set(undefined)"
+  />
+}

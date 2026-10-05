@@ -1,0 +1,48 @@
+<app-modal [title]="goal() ? 'ویرایش هدف' : 'هدف جدید'" (closed)="cancelled.emit()">
+  <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+    @if (error(); as message) {
+      <div class="alert alert-error" role="alert">{{ message }}</div>
+    }
+
+    <div class="form-grid">
+      <div class="field">
+        <label for="goal-name">عنوان هدف</label>
+        <input
+          id="goal-name"
+          type="text"
+          formControlName="name"
+          placeholder="مثلاً خرید ماشین، سفر"
+          [class.invalid]="invalid('name')"
+        />
+        @if (invalid('name')) {
+          <span class="field-error">عنوان را وارد کنید (حداکثر ۱۵۰ کاراکتر).</span>
+        }
+      </div>
+
+      <div class="field">
+        <label for="goal-target">مبلغ هدف (تومان)</label>
+        <app-amount-input inputId="goal-target" formControlName="targetAmount" />
+        @if (invalid('targetAmount')) {
+          <span class="field-error">مبلغ هدف باید بیشتر از صفر باشد.</span>
+        }
+      </div>
+
+      <div class="field">
+        <label for="goal-deadline">مهلت (اختیاری)</label>
+        <input id="goal-deadline" type="date" formControlName="deadline" />
+      </div>
+    </div>
+
+    <div class="field" style="margin-block-start: 1rem">
+      <label for="goal-description">توضیحات (اختیاری)</label>
+      <textarea id="goal-description" rows="2" formControlName="description"></textarea>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn" (click)="cancelled.emit()">انصراف</button>
+      <button type="submit" class="btn btn-primary" [disabled]="saving()">
+        {{ saving() ? 'در حال ذخیره…' : 'ذخیره' }}
+      </button>
+    </div>
+  </form>
+</app-modal>

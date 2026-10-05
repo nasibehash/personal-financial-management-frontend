@@ -1,0 +1,33 @@
+:host {
+  display: grid;
+  place-items: center;
+  min-block-size: 100dvh;
+  padding: 1rem;
+}
+.card {
+  inline-size: min(26rem, 100%);
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 700;
+  margin-block-end: 1rem;
+}
+.logo {
+  display: grid;
+  place-items: center;
+  inline-size: 2.2rem;
+  block-size: 2.2rem;
+  border-radius: 0.6rem;
+  background: var(--primary);
+  color: var(--on-primary);
+}
+form {
+  display: grid;
+  gap: 1rem;
+}
+.switch {
+  margin: 1rem 0 0;
+  text-align: center;
+}

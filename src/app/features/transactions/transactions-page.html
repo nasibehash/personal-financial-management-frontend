@@ -1,0 +1,169 @@
+<app-page-header title="تراکنش‌ها" subtitle="همه‌ی درآمدها، هزینه‌ها و انتقال‌های شما">
+  <button type="button" class="btn btn-primary" (click)="editing.set(null)">تراکنش جدید</button>
+</app-page-header>
+
+<section class="card filters" aria-label="فیلترها">
+  <div class="presets row">
+    <button type="button" class="btn btn-sm" (click)="thisMonth()">این ماه</button>
+    <button type="button" class="btn btn-sm" (click)="lastMonth()">ماه قبل</button>
+    @if (hasFilters()) {
+      <button type="button" class="btn btn-sm btn-ghost" (click)="clearFilters()">
+        پاک کردن فیلترها
+      </button>
+    }
+  </div>
+
+  <div class="form-grid">
+    <div class="field">
+      <label for="f-search">جستجو در توضیحات</label>
+      <input
+        id="f-search"
+        type="search"
+        [value]="searchText()"
+        (input)="setSearch($event)"
+        placeholder="مثلاً ناهار"
+      />
+    </div>
+    <div class="field">
+      <label for="f-from">از تاریخ</label>
+      <input id="f-from" type="date" [value]="from()" (change)="setFrom($event)" />
+    </div>
+    <div class="field">
+      <label for="f-to">تا تاریخ</label>
+      <input id="f-to" type="date" [value]="to()" (change)="setTo($event)" />
+    </div>
+    <div class="field">
+      <label for="f-type">نوع</label>
+      <select id="f-type" [value]="type()" (change)="setType($event)">
+        <option value="">همه</option>
+        <option value="Expense">{{ typeLabels.Expense }}</option>
+        <option value="Income">{{ typeLabels.Income }}</option>
+        <option value="Transfer">{{ typeLabels.Transfer }}</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="f-account">حساب</label>
+      <select id="f-account" [value]="accountId()" (change)="setAccount($event)">
+        <option value="">همه</option>
+        @for (account of lookups.accountList(); track account.id) {
+          <option [value]="account.id">{{ account.name }}</option>
+        }
+      </select>
+    </div>
+    <div class="field">
+      <label for="f-category">دسته‌بندی</label>
+      <select id="f-category" [value]="categoryId()" (change)="setCategory($event)">
+        <option value="">همه</option>
+        <optgroup label="هزینه">
+          @for (category of lookups.expenseCategories(); track category.id) {
+            <option [value]="category.id">{{ category.name }}</option>
+          }
+        </optgroup>
+        <optgroup label="درآمد">
+          @for (category of lookups.incomeCategories(); track category.id) {
+            <option [value]="category.id">{{ category.name }}</option>
+          }
+        </optgroup>
+      </select>
+    </div>
+  </div>
+</section>
+
+@if (loadError(); as message) {
+  <app-error [message]="message" (retry)="result.reload()" />
+} @else if (result.isLoading() && !result.hasValue()) {
+  <app-loading />
+} @else if (items().length === 0) {
+  <div class="card">
+    @if (hasFilters()) {
+      <app-empty title="تراکنشی با این فیلترها پیدا نشد" icon="🔍">
+        <button type="button" class="btn" (click)="clearFilters()">پاک کردن فیلترها</button>
+      </app-empty>
+    } @else {
+      <app-empty
+        title="هنوز تراکنشی ثبت نشده"
+        hint="اولین درآمد یا هزینه‌ی خود را ثبت کنید."
+        icon="💸"
+      >
+        <button type="button" class="btn btn-primary" (click)="editing.set(null)">
+          ثبت تراکنش
+        </button>
+      </app-empty>
+    }
+  </div>
+} @else {
+  <div class="card list" [class.reloading]="result.isLoading()">
+    <ul class="rows">
+      @for (tx of items(); track tx.id) {
+        <li class="tx">
+          <div class="desc">
+            <div class="title">
+              {{
+                tx.description || (tx.type === 'Transfer' ? 'انتقال بین حساب‌ها' : tx.categoryName)
+              }}
+            </div>
+            <div class="meta muted small">
+              @if (tx.type === 'Transfer') {
+                <span class="badge">{{ typeLabels.Transfer }}</span>
+                <span>{{ tx.accountName }} ← {{ tx.destinationAccountName }}</span>
+              } @else {
+                <span
+                  class="badge"
+                  [class.badge-income]="tx.type === 'Income'"
+                  [class.badge-expense]="tx.type === 'Expense'"
+                  >{{ tx.categoryName }}</span
+                >
+                <span>{{ tx.accountName }}</span>
+              }
+              @if (tx.source !== 'Manual') {
+                <span class="badge badge-primary">{{ sourceLabels[tx.source] }}</span>
+              }
+            </div>
+          </div>
+          <div
+            class="amount num ltr"
+            [class.income]="tx.type === 'Income'"
+            [class.expense]="tx.type === 'Expense'"
+          >
+            {{ tx.type === 'Income' ? '+' : tx.type === 'Expense' ? '−' : ''
+            }}{{ tx.amount | money }}
+          </div>
+          <div class="date muted small">{{ tx.date | jalali }}</div>
+          <div class="actions">
+            <button type="button" class="btn btn-sm btn-ghost" (click)="editing.set(tx)">
+              ویرایش
+            </button>
+            <button type="button" class="btn btn-sm btn-ghost btn-danger" (click)="remove(tx)">
+              حذف
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+
+    <nav class="pager row" aria-label="صفحه‌بندی">
+      <span class="muted small">{{ totalCount() | money }} تراکنش</span>
+      <span class="spacer"></span>
+      <button type="button" class="btn btn-sm" [disabled]="page() <= 1" (click)="goTo(page() - 1)">
+        قبلی
+      </button>
+      <span class="small num">صفحه {{ page() | money }} از {{ totalPages() | money }}</span>
+      <button
+        type="button"
+        class="btn btn-sm"
+        [disabled]="page() >= totalPages()"
+        (click)="goTo(page() + 1)"
+      >
+        بعدی
+      </button>
+    </nav>
+  </div>
+}
+
+@if (editing() !== undefined) {
+  <app-transaction-form
+    [transaction]="editing() ?? null"
+    (saved)="onSaved()"
+    (cancelled)="editing.set(undefined)"
+  />
+}

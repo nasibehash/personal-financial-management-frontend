@@ -1,0 +1,117 @@
+<app-page-header
+  [title]="'سلام ' + (auth.user()?.fullName ?? '')"
+  [subtitle]="'خلاصه‌ی ' + monthLabel"
+>
+  <a class="btn btn-primary" routerLink="/transactions">تراکنش‌ها</a>
+</app-page-header>
+
+@if (error(); as message) {
+  <app-error [message]="message" (retry)="reload()" />
+}
+
+<div class="stack">
+  <div class="stats">
+    <div class="stat">
+      <div class="label">درآمد</div>
+      <div class="value num income">{{ stats()?.totalIncome | money }}</div>
+    </div>
+    <div class="stat">
+      <div class="label">هزینه</div>
+      <div class="value num expense">{{ stats()?.totalExpense | money }}</div>
+    </div>
+    <div class="stat">
+      <div class="label">مانده‌ی این ماه</div>
+      <div
+        class="value num"
+        [class.income]="(stats()?.netAmount ?? 0) > 0"
+        [class.expense]="(stats()?.netAmount ?? 0) < 0"
+      >
+        {{ stats()?.netAmount | money }}
+      </div>
+    </div>
+    <div class="stat">
+      <div class="label">موجودی کل</div>
+      <div class="value num">{{ stats()?.totalBalance | money }}</div>
+    </div>
+  </div>
+
+  <app-smart-entry (saved)="reload()" />
+
+  <div class="grid">
+    <section class="card">
+      <h2>بیشترین هزینه‌ها</h2>
+      @if (categoryBars().length) {
+        <app-bar-list [items]="categoryBars()" tone="expense" />
+      } @else {
+        <p class="muted">این ماه هزینه‌ای ثبت نشده است.</p>
+      }
+    </section>
+
+    <section class="card">
+      <h2>روند چند ماه اخیر</h2>
+      <app-trend-chart [points]="trendPoints()" />
+    </section>
+
+    <section class="card">
+      <div class="row">
+        <h2>حساب‌ها</h2>
+        <span class="spacer"></span>
+        <a routerLink="/accounts" class="small">همه</a>
+      </div>
+      @for (account of accounts(); track account.id) {
+        <div class="line">
+          <span>{{ account.name }}</span>
+          <strong class="num" [class.expense]="account.balance < 0">
+            {{ account.balance | money }}
+          </strong>
+        </div>
+      } @empty {
+        <p class="muted">هنوز حسابی ندارید.</p>
+      }
+    </section>
+
+    <section class="card">
+      <div class="row">
+        <h2>اهداف در حال انجام</h2>
+        <span class="spacer"></span>
+        <a routerLink="/goals" class="small">همه</a>
+      </div>
+      @for (goal of activeGoals(); track goal.id) {
+        <a class="goal" [routerLink]="['/goals', goal.id]">
+          <div class="line">
+            <span>{{ goal.name }}</span>
+            <span class="muted small num">{{ goal.progressPercent }}٪</span>
+          </div>
+          <app-progress [value]="goal.progressPercent" [label]="'پیشرفت ' + goal.name" />
+        </a>
+      } @empty {
+        <p class="muted">هدفی تعریف نشده است.</p>
+      }
+    </section>
+  </div>
+
+  <section class="card">
+    <div class="row">
+      <h2>آخرین تراکنش‌ها</h2>
+      <span class="spacer"></span>
+      <a routerLink="/transactions" class="small">همه</a>
+    </div>
+    @for (t of recentItems(); track t.id) {
+      <div class="line">
+        <span>
+          {{ t.description || t.categoryName || t.accountName }}
+          <span class="muted small">· {{ t.date | jalali }}</span>
+        </span>
+        <strong
+          class="num ltr"
+          [class.income]="t.type === 'Income'"
+          [class.expense]="t.type === 'Expense'"
+        >
+          {{ t.type === 'Income' ? '+' : t.type === 'Expense' ? '−' : '' }}{{ t.amount | money }}
+        </strong>
+      </div>
+    } @empty {
+      <p class="muted">هنوز تراکنشی ثبت نشده است.</p>
+    }
+  </section>
+</div>
